@@ -90,16 +90,14 @@ if user_input:
     with st.chat_message("user"):
         st.markdown(user_input)
 
-    with st.chat_message("assistant"):
+   with st.chat_message("assistant"):
         try:
             result = qa_chain(user_input)
 
-            # 🧼 Clean unwanted tokens from response
-            response = (
+            # ✅ Clean unwanted tags like :contentReference, [oa, icite...
             response = result['result']
-            response = re.sub(r"icite:\d+\]\{index=\d+\}", "", response)  # Remove icite tags
+            response = re.sub(r"icite:\d+\]\{index=\d+\}", "", response)
             response = response.replace(":contentReference", "").replace("[oa", "").strip()
-            )
 
             sources = [doc.metadata.get("source", "unknown") for doc in result["source_documents"]]
         except Exception as e:
