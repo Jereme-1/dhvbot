@@ -5,7 +5,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.prompts import PromptTemplate
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.schema import Document
-from langchain.chat_models import ChatTogether  # 🔁 Changed from OllamaLLM
+from langchain_together import Together  # 🔁 Changed from OllamaLLM
 import pandas as pd
 import os
 
@@ -49,7 +49,7 @@ retriever = load_vectorstore().as_retriever(search_kwargs={"k": 4})
 # 🔁 Replace Ollama with Together.ai LLaMA 3
 llm = ChatTogether(
     model="meta-llama/Llama-3-8b-chat-hf",
-    api_key=st.secrets["TOGETHER_API_KEY"]
+    api_key=st.secrets["b6fb486bed0f7dd40d075871dff0255716a06afba510bcb04357d737ac5a6e42"]
 )
 
 # Prompt setup
