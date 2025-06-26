@@ -90,7 +90,7 @@ if user_input:
     with st.chat_message("user"):
         st.markdown(user_input)
 
-   with st.chat_message("assistant"):
+    with st.chat_message("assistant"):
         try:
             result = qa_chain(user_input)
 
