@@ -5,7 +5,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.prompts import PromptTemplate
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.schema import Document
-from langchain_together import Together  # 🔁 Changed from OllamaLLM
+from langchain_together import Together  # ✅ Correct import
 import pandas as pd
 import os
 
@@ -13,7 +13,6 @@ import os
 st.set_page_config(page_title="DHVBOT", layout="centered")
 st.title("🤖 DHVBOT - University Chat Assistant")
 
-# Load and prepare vectorstore from all CSVs
 @st.cache_resource
 def load_vectorstore():
     folder_path = "datasets"
@@ -43,21 +42,19 @@ def load_vectorstore():
     vectorstore = FAISS.from_documents(chunks, embeddings)
     return vectorstore
 
-# Load retriever and LLM
-retriever = load_vectorstore().as_retriever(search_kwargs={"k": 4})
-
-# 🔁 Replace Ollama with Together.ai LLaMA 3
-llm = ChatTogether(
+# ✅ Use Together.ai for LLaMA 3
+llm = Together(
     model="meta-llama/Llama-3-8b-chat-hf",
     api_key=st.secrets["b6fb486bed0f7dd40d075871dff0255716a06afba510bcb04357d737ac5a6e42"]
 )
 
-# Prompt setup
+retriever = load_vectorstore().as_retriever(search_kwargs={"k": 4})
+
 custom_prompt = PromptTemplate.from_template("""
 You are DHVBOT, a helpful, smart, and friendly university assistant chatbot.
 Speak like a student helping another student. Be brief, clear, and reliable.
 Use bullet points when needed. Always respond even to greetings or off-topic questions.
-                                             
+
 Your local is DHVSU (Don Honorio Ventura State University)
 
 Context:
@@ -69,7 +66,6 @@ Question:
 Answer:
 """)
 
-# Retrieval QA Chain
 qa_chain = RetrievalQA.from_chain_type(
     llm=llm,
     retriever=retriever,
@@ -77,16 +73,13 @@ qa_chain = RetrievalQA.from_chain_type(
     chain_type_kwargs={"prompt": custom_prompt}
 )
 
-# Chat memory
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Display past messages
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# Handle new user input
 user_input = st.chat_input("Ask me anything about university services, enrollment, grades...")
 if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
