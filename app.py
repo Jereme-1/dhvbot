@@ -89,16 +89,13 @@ if user_input:
     with st.chat_message("assistant"):
         try:
             result = qa_chain(user_input)
-            response = result['result']
+            # Clean unwanted :contentReference parts
+            response = result['result'].replace(":contentReference", "").strip()
             sources = [doc.metadata.get("source", "unknown") for doc in result["source_documents"]]
-        except Exception as e:
+            except Exception as e:
             response = f"⚠️ Error: {str(e)}"
             sources = []
 
-        st.markdown(response)
-        if sources:
-            st.markdown("**Sources:**")
-            for s in set(sources):
-                st.write(f"📁 {s}")
+      
 
         st.session_state.messages.append({"role": "assistant", "content": response})
