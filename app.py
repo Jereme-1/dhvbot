@@ -14,11 +14,10 @@ import re
 st.set_page_config(page_title="DHVBOT", layout="centered")
 st.title("🤖 DHVBOT - University Chat Assistant")
 
-# Load and prepare vectorstore from all CSVs
 @st.cache_resource
 def load_vectorstore():
     folder_path = "datasets"
-    all_docs = []
+    all_texts = []
 
     for filename in os.listdir(folder_path):
         if filename.endswith(".csv"):
@@ -26,18 +25,20 @@ def load_vectorstore():
             try:
                 df = pd.read_csv(file_path, on_bad_lines='skip')
                 texts = df.apply(lambda row: " | ".join([str(x) for x in row]), axis=1).tolist()
-                docs = [Document(page_content=text, metadata={"source": filename}) for text in texts]
-                all_docs.extend(docs)
+                for text in texts:
+                    all_texts.append((text, filename))  # ✅ Track actual source
             except Exception as e:
                 st.warning(f"⚠️ Skipping `{filename}` due to error: {e}")
                 continue
 
-    if not all_docs:
+    if not all_texts:
         st.error("🚫 No valid CSV data found.")
         st.stop()
 
+    docs = [Document(page_content=text, metadata={"source": fname}) for text, fname in all_texts]
+
     splitter = RecursiveCharacterTextSplitter(chunk_size=300, chunk_overlap=30)
-    chunks = splitter.split_documents(all_docs)
+    chunks = splitter.split_documents(docs)
 
     embeddings = HuggingFaceEmbeddings(model_name="BAAI/bge-base-en-v1.5")
     vectorstore = FAISS.from_documents(chunks, embeddings)
@@ -51,7 +52,6 @@ llm = Together(
 
 retriever = load_vectorstore().as_retriever(search_kwargs={"k": 4})
 
-# Custom prompt
 custom_prompt = PromptTemplate.from_template("""
 You are DHVBOT, a helpful, smart, and friendly university assistant chatbot.
 Speak like a student helping another student. Be brief, clear, and reliable.
