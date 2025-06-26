@@ -105,10 +105,6 @@ if user_input:
             response = f"⚠️ Error: {str(e)}"
             sources = []
 
-        st.markdown(response)
-        if sources:
-            st.markdown("**Sources:**")
-            for s in set(sources):
-                st.write(f"📁 {s}")
+      
 
         st.session_state.messages.append({"role": "assistant", "content": response})
