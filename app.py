@@ -5,7 +5,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.prompts import PromptTemplate
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.schema import Document
-from langchain_together import Together  # ✅ Correct import
+from langchain_together import Together
 import pandas as pd
 import os
 
@@ -73,13 +73,16 @@ qa_chain = RetrievalQA.from_chain_type(
     chain_type_kwargs={"prompt": custom_prompt}
 )
 
+# Initialize chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
+# Display past chat messages
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
+# Input box
 user_input = st.chat_input("Ask me anything about university services, enrollment, grades...")
 if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
@@ -89,13 +92,24 @@ if user_input:
     with st.chat_message("assistant"):
         try:
             result = qa_chain(user_input)
-            # Clean unwanted :contentReference parts
-            response = result['result'].replace(":contentReference", "").strip()
+
+            # 🧼 Clean unwanted tokens from response
+            response = (
+                result['result']
+                .replace(":contentReference", "")
+                .replace("[oa", "")
+                .strip()
+            )
+
             sources = [doc.metadata.get("source", "unknown") for doc in result["source_documents"]]
-            except Exception as e:
+        except Exception as e:
             response = f"⚠️ Error: {str(e)}"
             sources = []
 
-      
+        st.markdown(response)
+        if sources:
+            st.markdown("**Sources:**")
+            for s in set(sources):
+                st.write(f"📁 {s}")
 
         st.session_state.messages.append({"role": "assistant", "content": response})
