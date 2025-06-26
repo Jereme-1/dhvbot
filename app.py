@@ -8,6 +8,7 @@ from langchain.schema import Document
 from langchain_together import Together
 import pandas as pd
 import os
+import re
 
 # Streamlit setup
 st.set_page_config(page_title="DHVBOT", layout="centered")
@@ -95,10 +96,9 @@ if user_input:
 
             # 🧼 Clean unwanted tokens from response
             response = (
-                result['result']
-                .replace(":contentReference", "")
-                .replace("[oa", "")
-                .strip()
+            response = result['result']
+            response = re.sub(r"icite:\d+\]\{index=\d+\}", "", response)  # Remove icite tags
+            response = response.replace(":contentReference", "").replace("[oa", "").strip()
             )
 
             sources = [doc.metadata.get("source", "unknown") for doc in result["source_documents"]]
