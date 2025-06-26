@@ -45,7 +45,7 @@ def load_vectorstore():
 # ✅ Use Together.ai for LLaMA 3
 llm = Together(
     model="meta-llama/Llama-3-8b-chat-hf",
-    api_key=st.secrets["b6fb486bed0f7dd40d075871dff0255716a06afba510bcb04357d737ac5a6e42"]
+    api_key=st.secrets["TOGETHER_API_KEY"]
 )
 
 retriever = load_vectorstore().as_retriever(search_kwargs={"k": 4})
